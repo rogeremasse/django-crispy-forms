@@ -6,7 +6,7 @@ import pytest
 import django
 from django import forms
 from django.forms.models import formset_factory, modelformset_factory
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 from django.template import Context, Template
 from django.utils.translation import ugettext_lazy as _
 
@@ -293,7 +293,7 @@ def test_formset_layout(settings):
 
     # Check form structure
     assert html.count('<form') == 1
-    assert html.count("<input type='hidden' name='csrfmiddlewaretoken'") == 1
+    assert html.count('csrfmiddlewaretoken') == 1
     assert 'formsets-that-rock' in html
     assert 'method="post"' in html
     assert 'id="thisFormsetRocks"' in html
@@ -555,7 +555,11 @@ def test_keepcontext_context_manager(settings):
     )
     context = {'form': form}
 
-    response = render_to_response('crispy_render_template.html', context)
+    response = render(
+        request=None,
+        template_name='crispy_render_template.html',
+        context=context
+    )
 
     if settings.CRISPY_TEMPLATE_PACK == 'bootstrap':
         assert response.content.count(b'checkbox inline') == 3

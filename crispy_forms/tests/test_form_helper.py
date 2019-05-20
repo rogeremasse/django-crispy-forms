@@ -389,7 +389,7 @@ def test_formset_with_helper_without_layout(settings):
     html = template.render(c)
 
     assert html.count('<form') == 1
-    assert html.count("<input type='hidden' name='csrfmiddlewaretoken'") == 1
+    assert html.count('csrfmiddlewaretoken') == 1
 
     # Check formset management form
     assert 'form-TOTAL_FORMS' in html
@@ -417,7 +417,7 @@ def test_CSRF_token_POST_form():
     c = Context({'form': SampleForm(), 'form_helper': form_helper, 'csrf_token': _get_new_csrf_key()})
     html = template.render(c)
 
-    assert "<input type='hidden' name='csrfmiddlewaretoken'" in html
+    assert 'csrfmiddlewaretoken' in html
 
 
 def test_CSRF_token_GET_form():
@@ -431,7 +431,7 @@ def test_CSRF_token_GET_form():
     c = Context({'form': SampleForm(), 'form_helper': form_helper, 'csrf_token': _get_new_csrf_key()})
     html = template.render(c)
 
-    assert "<input type='hidden' name='csrfmiddlewaretoken'" not in html
+    assert 'csrfmiddlewaretoken' not in html
 
 
 def test_disable_csrf():
@@ -498,6 +498,26 @@ def test_helper_custom_field_template():
 
     html = render_crispy_form(form)
     assert html.count("<h1>Special custom field</h1>") == 2
+
+
+def test_helper_custom_field_template_no_layout():
+    form = SampleForm()
+    form.helper = FormHelper()
+    form.helper.field_template = 'custom_field_template.html'
+
+    html = render_crispy_form(form)
+    for field in form.fields:
+        assert html.count('id="div_id_%s"' % field) == 1
+    assert html.count("<h1>Special custom field</h1>") == len(form.fields)
+
+
+def test_helper_std_field_template_no_layout():
+    form = SampleForm()
+    form.helper = FormHelper()
+
+    html = render_crispy_form(form)
+    for field in form.fields:
+        assert html.count('id="div_id_%s"' % field) == 1
 
 
 @only_uni_form
@@ -632,7 +652,7 @@ def test_error_text_inline(settings):
         help_tag_name = 'div'
 
     matches = re.findall(
-        '<span id="error_\d_\w*" class="%s"' % help_class, html, re.MULTILINE
+        r'<span id="error_\d_\w*" class="%s"' % help_class, html, re.MULTILINE
     )
     assert len(matches) == 3
 
@@ -649,7 +669,7 @@ def test_error_text_inline(settings):
         help_tag_name = 'p'
 
     matches = re.findall(
-        '<%s id="error_\d_\w*" class="%s"' % (help_tag_name, help_class),
+        r'<%s id="error_\d_\w*" class="%s"' % (help_tag_name, help_class),
         html,
         re.MULTILINE
     )
